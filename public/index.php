@@ -2,7 +2,7 @@
 
 require_once(__DIR__ . "./../vendor/autoload.php");
 
-use app\controller\AuthController;
+use app\controllers\AuthController;
 use app\controllers\SiteController;
 use core\Application;
 

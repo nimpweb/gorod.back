@@ -22,7 +22,7 @@ class Router {
 
     public function resolve() {
         $path = $this->request->getPath();
-        $method = $this->request->getMethod();
+        $method = $this->request->method();
         $func = $this->routes[$method][$path] ?? false;
         if ($func === false) { 
             $this->response->setStatusCode(404);
@@ -32,9 +32,10 @@ class Router {
         if (is_string($func)) {
             return $this->renderView($func);
         }
-
+        
         if (is_array($func)) {
-            $func[0] = new $func[0]();
+            Application::$app->controller = new $func[0]();
+            $func[0] = Application::$app->controller;
         }
 
         return call_user_func($func, $this->request, $this->response);
@@ -53,8 +54,9 @@ class Router {
 
     
     protected function getLayout() {
+        $layoutName = Application::$app->controller->layout;
         ob_start();
-        include_once Application::layoutPath() . "\default.php";
+        include_once Application::layoutPath() . "\\$layoutName.php";
         return ob_get_clean();
     }
     

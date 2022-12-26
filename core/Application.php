@@ -6,6 +6,7 @@ class Application {
     public Router $router;
     public Request $request;
     public Response $response;
+    public Controller $controller;
     
     public static string $ROOT_DIR;
     public static Application $app;
@@ -34,8 +35,16 @@ class Application {
         self::$app = $this;
     }
 
-    public function run() {
+    public function run(): void {
         echo $this->router->resolve();
+    }
+
+    public function getController(): Controller {
+        return $this->controller;
+    }
+
+    public function setController($controller): void {
+        $this->controller = $controller;
     }
 
 }
