@@ -1,0 +1,17 @@
+{
+    "name": "orbank/backend",
+    "autoload": {
+        "psr-4": {
+            "root\\": "./",
+            "app\\": "./mvc",
+            "core\\": "./core"
+        }
+    },
+    "authors": [
+        {
+            "name": "nimp",
+            "email": "nimweb@yandex.ru"
+        }
+    ],
+    "require": {}
+}
