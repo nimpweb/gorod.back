@@ -11,11 +11,11 @@ class SiteController extends Controller {
         $params = [
             "param1" => "yeah"
         ];
-        $this->render('home', $params);
+        return $this->render('home', $params);
     }
 
     public function contact() {
-        $this->render('contact');
+        return $this->render('contact');
     }
 
     public function handleContact(Request $request) {

@@ -11,7 +11,7 @@ class Application {
     public static Application $app;
 
     public static function layoutPath() {
-        return realpath(self::$ROOT_DIR.'/mvc/layout//');
+        return realpath(self::$ROOT_DIR . '/mvc/layout/');
     }
 
     public static function modelPath() {
@@ -33,7 +33,6 @@ class Application {
         self::$ROOT_DIR = $rootPath;
         self::$app = $this;
     }
-
 
     public function run() {
         echo $this->router->resolve();

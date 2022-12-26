@@ -43,7 +43,7 @@ class Router {
     public function renderView($view, $params = []) {
         $layoutContent = $this->getLayout();
         $viewContent = $this->getView($view, $params);
-        return str_replace("{{content}}", $viewContent, $layoutContent);
+        return str_replace('{{content}}', $viewContent, $layoutContent);
     }
 
     public function renderContent($content) {
@@ -54,7 +54,7 @@ class Router {
     
     protected function getLayout() {
         ob_start();
-        include_once Application::layoutPath()."\default.php";
+        include_once Application::layoutPath() . "\default.php";
         return ob_get_clean();
     }
     
