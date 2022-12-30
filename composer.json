@@ -13,5 +13,7 @@
             "email": "nimweb@yandex.ru"
         }
     ],
-    "require": {}
+    "require": {
+        "vlucas/phpdotenv": "^5.5"
+    }
 }

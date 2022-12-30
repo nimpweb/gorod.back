@@ -40,6 +40,9 @@
 
 
     <main>
+        <?php  if (\core\Application::$app->session->getFlash('success')): ?>
+        <div class="alert alert-success"></div>
+        <?php endif; ?>
         <div class="container mt10">{{content}}</div>
     </main>
 </body>
