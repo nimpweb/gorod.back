@@ -1,3 +1,20 @@
+<?php
+use core\form\Form as Form;
+
+?>
+
+<?php $form = Form::begin("/register", "post"); ?>
+<div class="row">
+    <div class="col"><?= $form->field($model, "firstname"); ?></div>
+    <div class="col"><?= $form->field($model, "lastname"); ?></div>
+</div>
+<?= $form->field($model, "email"); ?>
+<?= $form->field($model, "password"); ?>
+<?= $form->field($model, "passwordConfirm"); ?>
+<button type="submit" class="btn btn-primary">Регистрация</button>
+<?= Form::end(); ?>
+
+
 <form action="/register" method="post">
   <div class="row mb-3">
     <label for="inputEmail3" class="col-sm-2 col-form-label">Фамилия</label>
@@ -30,5 +47,5 @@
       <input type="password" name="passwordConfirm" class="form-control">
     </div>
   </div>
-  <button type="submit" class="btn btn-primary">Регистрация</button>
+  
 </form>

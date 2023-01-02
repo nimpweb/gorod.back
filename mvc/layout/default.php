@@ -1,3 +1,8 @@
+<?php 
+
+use core\Application;
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,8 +45,9 @@
 
 
     <main>
-        <?php  if (\core\Application::$app->session->getFlash('success')): ?>
+        <?php  if (Application::$app->session->getFlash('success')): ?>
         <div class="alert alert-success"></div>
+        <?php echo Application::$app->session->getFlash('success'); ?>
         <?php endif; ?>
         <div class="container mt10">{{content}}</div>
     </main>

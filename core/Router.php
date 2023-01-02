@@ -46,15 +46,16 @@ class Router {
         $viewContent = $this->getView($view, $params);
         return str_replace('{{content}}', $viewContent, $layoutContent);
     }
-
+    
     public function renderContent($content) {
+        \core\Helper::debug('some data', true);
         $layoutContent = $this->getLayout();
         return str_replace("{{content}}", $content, $layoutContent);
     }
 
     
     protected function getLayout() {
-        $layoutName = Application::$app->controller->layout;
+        $layoutName = Application::$app->controller->layout ?? "default";
         ob_start();
         include_once Application::layoutPath() . "\\$layoutName.php";
         return ob_get_clean();

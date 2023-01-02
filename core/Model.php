@@ -34,7 +34,7 @@ abstract class Model {
             foreach ($rules as $rule) {
                 $ruleName = $rule;
                 if (!is_string($ruleName)) {
-                    $ruleName = $rules[0];
+                    $ruleName = $rule[0];
                 }
                 if ($ruleName === self::RULE_REQUIRED && !$value) {
                     $this->addError($attribute, $ruleName);
@@ -51,21 +51,29 @@ abstract class Model {
                 if ($ruleName === self::RULE_MATCH && $value != $this->$rule['match']) {
                     $this->addError($attribute, $ruleName, $rule);
                 }
-                if ($ruleName === self::RULE_UNIQUE) {
-                    $className = $rule['class'];
-                    $uniqueAttribute = $rule['attribute'] ?? $attribute;
-                    $tableName = $className::tableName();
-                    $statement = Application::$app->db->prepare("SELECT * FROM $tableName WHERE $uniqueAttribute = :attribute");
-                    $statement->bindValue(':attribute', $value);
-                    $statement->execute();
-                    $object = $statement->fetchObject();
-                    if ($object) {
-                        $this->addError($attribute, $ruleName, ['field'=> $attribute]);
-                    }
-                }
+                // if ($ruleName === self::RULE_UNIQUE) {
+                //     $className = $rule['class'];
+                //     $uniqueAttribute = $rule['attribute'] ?? $attribute;
+                //     $tableName = $className::tableName();
+                //     $statement = Application::$app->db->prepare("SELECT * FROM $tableName WHERE $uniqueAttribute = :attribute");
+                //     $statement->bindValue(':attribute', $value);
+                //     $statement->execute();
+                //     $object = $statement->fetchObject();
+                //     if ($object) {
+                //         $this->addError($attribute, $ruleName, ['field'=> $attribute]);
+                //     }
+                // }
             }
         }
         return empty($this->errors);
+    }
+
+    public function hasError(string $attribute) {
+        return count($this->errors[$attribute] ?? []) > 0;
+    }
+
+    public function getFirstError(string $attribute) {
+        return $this->hasError($attribute) ? $this->errors[$attribute][0] : '';
     }
 
     public function addError(string $attribute, string $ruleName, array $params = []) {

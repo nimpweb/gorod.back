@@ -18,8 +18,7 @@ class Database {
         return $this->pdo->prepare($sql);
     }
 
-
-    // Migrationsz
+    /** Migrations block...  */
     public function applyMigrations() {
         $this->createMigrationsTable();
         $appliedMigrations = $this->getAppliedMigrations();
@@ -45,23 +44,34 @@ class Database {
         }
     }
 
+    /**
+     *  array $migrations
+     *  save all migrations in database
+     */
     private function saveMigrations(array $migrations) {
         $data = implode(',', array_map(function($m) {return "('$m')"; }, $migrations));
         $statement = $this->pdo->prepare('INSERT INTO migrations(migration) VALUES '.$data);
         $statement->execute();
     }
 
+    /**
+     *  create a migration table if not existing
+     */
     private function createMigrationsTable() {
         $sql = "CREATE TABLE IF NOT EXISTS migrations ( id INT AUTO_INCREMENT PRIMARY KEY, migration VARCHAR(255), create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB";
         $this->pdo->exec($sql);
     }
 
+    /**
+     *  get all applied migrations
+     */
     private function getAppliedMigrations() {
         $statement = $this->pdo->prepare("SELECT migration FROM migrations");
         $statement->execute();
         return $statement->fetchAll(\PDO::FETCH_COLUMN);
     }
 
+    /** print a migration log */
     private function migrationsLog($message) {
         echo "[".date("Y-m-d H:i:s")."] - " . $message.PHP_EOL;
     }

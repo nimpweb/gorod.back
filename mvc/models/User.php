@@ -11,8 +11,8 @@ class User extends DBModel {
     const STATUS_DELETED = 2;
     
 
-    public string $firstName = "";
-    public string $middleName = "";
+    public string $firstname = "";
+    public string $lastname = "";
     public string $email = "";
     public int $status = SELF::STATUS_INACTIVE;
     public string $password = "";
