@@ -35,6 +35,8 @@ $app->router->get('/logout', [AuthController::class, 'logout']);
 
 $app->router->get('/getAllUsers', [UserController::class, 'getAllUsers']);
 
+$app->router->get('/userInfo', [UserController::class, 'userInfo']);
+
 
 
 $app->run();

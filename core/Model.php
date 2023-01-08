@@ -14,8 +14,17 @@ abstract class Model {
     public array $errors = [];
 
     abstract public function rules(): array;
+    abstract public function labels(): array;
 
-    public function loadData($data) {
+    // protected function findOne(array $where): array {
+    //     return 
+    // }
+
+    public function getLabel(string $attribute) {
+        return $this->labels()[$attribute] ?? $attribute;
+    }
+
+    private function loadData($data) {
         foreach ($data as $key => $value) {
             if (property_exists($this, $key)) {
                 $this->{$key} = $value;
@@ -28,7 +37,7 @@ abstract class Model {
         return $this->validate();
     }
 
-    public function validate() {
+    public function validate(): bool {
         foreach ($this->rules() as $attribute => $rules) {
             $value = $this->{$attribute};
             foreach ($rules as $rule) {
@@ -37,32 +46,33 @@ abstract class Model {
                     $ruleName = $rule[0];
                 }
                 if ($ruleName === self::RULE_REQUIRED && !$value) {
-                    $this->addError($attribute, $ruleName);
+                    $this->addErrorForRule($attribute, $ruleName);
                 }
                 if ($ruleName === self::RULE_EMAIL && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                    $this->addError($attribute, $ruleName);
+                    $this->addErrorForRule($attribute, $ruleName);
                 }
                 if ($ruleName === self::RULE_MIN && strlen($value) < $rule['min']) {
-                    $this->addError($attribute, $ruleName, $rule);
+                    $this->addErrorForRule($attribute, $ruleName, $rule);
                 }
                 if ($ruleName === self::RULE_MAX && strlen($value) > $rule['max']) {
-                    $this->addError($attribute, $ruleName, $rule);
+                    $this->addErrorForRule($attribute, $ruleName, $rule);
                 }
-                if ($ruleName === self::RULE_MATCH && $value != $this->$rule['match']) {
-                    $this->addError($attribute, $ruleName, $rule);
+                if ($ruleName === self::RULE_MATCH && $value != $this->{$rule['match']}) {
+                    $rule['match'] = $this->getLabel($rule['match']);
+                    $this->addErrorForRule($attribute, $ruleName, $rule);
                 }
-                // if ($ruleName === self::RULE_UNIQUE) {
-                //     $className = $rule['class'];
-                //     $uniqueAttribute = $rule['attribute'] ?? $attribute;
-                //     $tableName = $className::tableName();
-                //     $statement = Application::$app->db->prepare("SELECT * FROM $tableName WHERE $uniqueAttribute = :attribute");
-                //     $statement->bindValue(':attribute', $value);
-                //     $statement->execute();
-                //     $object = $statement->fetchObject();
-                //     if ($object) {
-                //         $this->addError($attribute, $ruleName, ['field'=> $attribute]);
-                //     }
-                // }
+                if ($ruleName === self::RULE_UNIQUE) {
+                    $className = $rule['class'];
+                    $uniqueAttribute = $rule['attribute'] ?? $attribute;
+                    $tableName = $className::tableName();
+                    $statement = Application::$app->db->prepare("SELECT * FROM $tableName WHERE $uniqueAttribute = :attribute");
+                    $statement->bindValue(':attribute', $value);
+                    $statement->execute();
+                    $object = $statement->fetchObject();
+                    if ($object) {
+                        $this->addErrorForRule($attribute, $ruleName, ['field'=> $this->getLabel($attribute)]);
+                    }
+                }
             }
         }
         return empty($this->errors);
@@ -76,8 +86,12 @@ abstract class Model {
         return $this->hasError($attribute) ? $this->errors[$attribute][0] : '';
     }
 
-    public function addError(string $attribute, string $ruleName, array $params = []) {
-        $message = $this->getErrorMessage($ruleName)[$attribute] ?? '';
+    public function addError(string $attribute, string $message) {
+        $this->errors[$attribute][] = $message;
+    }
+
+    private function addErrorForRule(string $attribute, string $ruleName, array $params = []) {
+        $message = $this->getErrorMessage()[$ruleName] ?? '';
         foreach ($params as $key => $value) {
             $message = str_replace("{{$key}}", $value, $message);
         }

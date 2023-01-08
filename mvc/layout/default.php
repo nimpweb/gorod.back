@@ -15,39 +15,31 @@ use core\Application;
 </head>
 <body>
     <header>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">HEADER</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="/">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/contacts">Контакты</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/register">Регистрация</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/login">Вход</a>
-        </li>
-      </ul>
-    </div>
-  </div>
-</nav>
-
-
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">HEADER</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/contacts">Контакты</a></li>
+                    <?php if (Application::$app->user): ?>
+                        <li class="nav-item pull-right"><a class="nav-link" href="/logout">Выйти</a></li>
+                    <?php else: ?>
+                        <li class="nav-item"><a class="nav-link" href="/register">Регистрация</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/login">Вход</a></li>
+                    <?php endif; ?>
+                </ul>
+                </div>
+            </div>
+        </nav>
     </header>
-
 
     <main>
         <?php  if (Application::$app->session->getFlash('success')): ?>
-        <div class="alert alert-success"></div>
-        <?php echo Application::$app->session->getFlash('success'); ?>
+        <div class="alert alert-success"><?php echo Application::$app->session->getFlash('success'); ?></div>
         <?php endif; ?>
         <div class="container mt10">{{content}}</div>
     </main>

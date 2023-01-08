@@ -3,12 +3,14 @@ namespace core;
 
 class Application {
 
+    public string $userClass = '';
     public Router $router;
     public Request $request;
     public Response $response;
     public Controller $controller;
     public Database $db;
     public Session $session;
+    public ?DbModel $user;
     
     public static string $ROOT_DIR;
     public static Application $app;
@@ -30,6 +32,7 @@ class Application {
     }
     
     public function __construct($rootPath, array $config) {
+        $this->userClass = $config['userClass'];
         $this->request = new Request();
         $this->response = new Response();
         $this->router = new Router($this->request, $this->response);
@@ -37,6 +40,26 @@ class Application {
         $this->session = new Session();
         self::$ROOT_DIR = $rootPath;
         self::$app = $this;
+        
+        $primaryValue = $this->session->get('user');
+        if ($primaryValue) {
+            $primaryKey = $this->userClass::primaryKey();
+            $this->user = $this->userClass::findOne([$primaryKey => $primaryValue]);
+        } else {
+            $this->user = null;
+        }
+    }
+
+    public function login(DbModel $user) {
+        $this->user = $user;
+        $this->session->set('user', $user->{$user->primaryKey()});
+        return true;
+    }
+
+    public function logout() {
+        $this->user = null;
+        $this->session->remove('user');
+        // $this->response->redirect('/');
     }
 
     public function run(): void {
