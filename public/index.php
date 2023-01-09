@@ -16,9 +16,12 @@ $config = [
         'dsn' => $_ENV['DB_DSN'],
         'user' => $_ENV['DB_USER'],
         'password' => $_ENV['DB_PASSWORD'],
+    ],
+    'soap' => [
+        'host' => $_ENV['SOAP_HOST'],
+        'terminal' => $_ENV['SOAP_TERMINAL'],
     ]
 ];
-
 $app = new Application(dirname(__DIR__), $config );
 
 /** SiteController */
