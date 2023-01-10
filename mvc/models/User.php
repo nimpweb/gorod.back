@@ -13,7 +13,7 @@ class User extends DBModel {
     const STATUS_ACTIVE = 1;
     const STATUS_DELETED = 2;
 
-    private int $id = null;
+    private ?int $id = null;
     public string $firstname = "";
     public string $lastname = "";
     public string $email = "";
@@ -30,7 +30,7 @@ class User extends DBModel {
     }
 
     public function attributes(): array {
-        return ['firstname', 'lastname', 'email', 'password', 'status'];
+        return ['firstname', 'lastname', 'email', 'status'];
     }
 
     public function labels(): array {
@@ -72,11 +72,21 @@ class User extends DBModel {
                 'errors' => $user->getValidatedErrorMessages()
             ];
         }
+        if ($id = $user->insert()) {
+            // unset($user['password']);
+            // unset($user['passwordConfirm']);
+            return [
+                'success' => true,
+                'data' => $user,
+                'errors' => []
+            ];
+        }
         return [
-            'success' => true,
-            'data' => $user,
-            'errors' => []
+            'success' => false,
+            'data' => null,
+            'errors' => ['Произошла ошибка при регистрации. Попробуйте чуть позже...']
         ];
+
     }
     
 }

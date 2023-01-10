@@ -30,9 +30,7 @@ class AuthController extends Controller {
          }
          $userArray = User::create($request);
          if ($userArray['success']) {
-            $user =  $userArray['user'];
-            unset($user['password']);
-            return $response->jsonSuccess(['user' => $user]);
+            return $response->jsonSuccess(['user' => $userArray['data'] ?? null]);
          }
         return $response->jsonFailure('Что-то пошло не так...', Response::BAD_REQUEST, $userArray['errors']);
     }
