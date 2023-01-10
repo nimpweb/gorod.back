@@ -15,30 +15,26 @@ class AuthController extends Controller {
     public function login (Request $request, Response $response) {
         $loginForm = new LoginForm();
         if ($request->isPost()) {
-            if ($loginForm->validateRequest($request) && $loginForm->login()) {
-                $response->redirect('/');
-                return;
+            $loginResponse = $loginForm->login();
+            if ($loginResponse && $loginResponse['success']) {
+                return $response->jsonSuccess($loginResponse);
             }
+            return $response->jsonFailure('Вы не прошли авторизацию! Проверьте правильность ввода данных', Response::UNAUTHORIZED, $loginForm->getValidatedErrorMessages());
         }
-        return $this->render('login', [
-            'model' => $loginForm
-        ]);
+        return $response->json(['success' => false], Response::NOT_FOUND);
     }
 
     public function register(Request $request, Response $response) {
         if (!$request->isPost()) { 
-            return $response->sendJson([], Response::$MethodNotAllowed);
+            return $response->jsonFailure('', Response::METHOD_NOT_ALLOWED);
          }
-         $user = new User();
-         if ($user->validateRequest($request) && $user->insert()) {
-            return $response->sendJson(['success' => true, 'message' => "Some text was sent"]);
+         $userArray = User::create($request);
+         if ($userArray['success']) {
+            $user =  $userArray['user'];
             unset($user['password']);
-        }
-        return $response->sendJson($user);
-
-        // return $this->render('register', [
-        //     'model' => $user,
-        // ]);
+            return $response->jsonSuccess(['user' => $user]);
+         }
+        return $response->jsonFailure('Что-то пошло не так...', Response::BAD_REQUEST, $userArray['errors']);
     }
 
     public function logout(Request $request, Response $response) {

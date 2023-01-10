@@ -24,6 +24,7 @@ abstract class Model {
         return $this->labels()[$attribute] ?? $attribute;
     }
 
+
     private function loadData($data) {
         foreach ($data as $key => $value) {
             if (property_exists($this, $key)) {
@@ -76,6 +77,10 @@ abstract class Model {
             }
         }
         return empty($this->errors);
+    }
+
+    public function getValidatedErrorMessages() {
+        return $this->errors;
     }
 
     public function hasError(string $attribute) {

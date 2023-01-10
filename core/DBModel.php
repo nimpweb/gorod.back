@@ -26,21 +26,33 @@ abstract class DBModel extends Model {
 
     public static function findOne(array $where = []) {
         return static::find($where)[0];
-        // $tableName = static::tableName();
-        // $attributes = array_keys($where);
-
-        // $sql = "SELECT * FROM $tableName";
-        // if (!empty($where)) {
-        //     $sql .= " WHERE ".implode(" AND ", array_map(function($attribute) {  return "$attribute = :$attribute"; }, $attributes));
-        // }
-        // $statement = self::prepare($sql);
-        // foreach($where as $key => $item) {
-        //     $statement->bindValue(":$key", $item);
-        // }
-        // $statement->execute();
-        // return $statement->fetchObject(static::class);
     }
-    
+
+    public static function delete(int $id): bool {
+        $tableName = static::tableName();
+        $statement = self::prepare("DELETE FROM $tableName WHERE id=:id");
+        $statement->bindValue(':id', $id);
+        return $statement->execute();
+    }
+
+    public static function select(string $sql, array $where = []) {
+        $statement = self::prepare($sql);
+        if (!empty($where)) {
+            foreach($where as $value) $statement->bindValue(":$value", $value);
+        }
+        $statement->execute();
+        return $statement->fetchAll(\PDO::FETCH_ASSOC);
+
+    }
+
+    public static function execSQL(string $sql, array $values = []): bool {
+        $statement = self::prepare($sql);
+        if (!empty($values)) {
+            foreach($values as $value) $statement->bindValue(":$value", $value);
+        }
+        return $statement->execute();
+    }
+
     public function insert() {
         $tableName = static::tableName();
         $attributes = $this->attributes();
@@ -52,6 +64,26 @@ abstract class DBModel extends Model {
         $statement->execute();
         return self::getLastInsertId();
     }
+
+    public function update() {
+        $tableName = static::tableName();
+        $attributes = $this->attributes();
+    }
+
+    public function __get(string $name) {
+        if (in_array($name, $this->attributes())) {
+            return $this->{$name};
+        }
+        return false;
+    }
+
+    public function toArray(): array {
+        $arr = [];
+        foreach($this->attributes() as $key => $value) {
+            $arr[$key] = $value;
+        }
+        return $arr;
+    }    
 
     public static function prepare($sql) {
         return Application::$app->db->pdo->prepare($sql);

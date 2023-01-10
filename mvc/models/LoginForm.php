@@ -4,6 +4,7 @@ namespace app\models;
 
 use core\Application;
 use core\Model;
+use core\Token;
 
 class LoginForm extends Model {
 
@@ -35,8 +36,13 @@ class LoginForm extends Model {
             return false;
         }
 
-        return Application::$app->login($user);
+        $token = Token::create($user);
+        Application::$app->setToken($token);
 
+        return [
+            'user' => $user,
+            'token' => $token
+        ];
     }
 
 }

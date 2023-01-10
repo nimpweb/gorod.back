@@ -4,15 +4,15 @@ namespace core;
 
 class Response {
 
-    public static int $OK = 200;
-    public static int $Created = 201;
-    public static int $BadRequest = 400;
-    public static int $Unauthorized = 401;
-    public static int $PaymentRequired = 402;
-    public static int $Forbidden = 403;
-    public static int $NotFound = 404;
-    public static int $MethodNotAllowed = 405;
-    public static int $InternalServerError = 500;
+    const OK = 200;
+    const CREATED = 201;
+    const BAD_REQUEST = 400;
+    const UNAUTHORIZED = 401;
+    const PAYMENT_REQUIRED = 402;
+    const FORBIDDEN = 403;
+    const NOT_FOUND = 404;
+    const METHOD_NOT_ALLOWED = 405;
+    const INTERNAL_SERVER_ERROR = 500;
 
     public function redirect(string $url) {
         header('Location: '. $url);
@@ -22,14 +22,21 @@ class Response {
         http_response_code($code);
     }
 
-    public function sendJson(mixed $data, int $code = 200) {
-        // header("Access-Control-Allow-Origin: *");
-        // header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-        // header("Access-Control-Allow-Headers: X-Requested-With");
-        header("Content-Type: application/json; charset=UTF-8");
+    public function json(mixed $data, int $code = self::OK, array $headers = ["Content-Type: application/json; charset=UTF-8"]) {
+        if (!empty($headers)) {
+            foreach ($headers as $header) header($header);
+        }
         $this->setStatusCode($code);
         echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_FORCE_OBJECT);
         return;
+    }
+
+    public function jsonSuccess(mixed $data) {
+        return $this->json(array_merge(['success' => true], $data), self::OK);
+    }
+    
+    public function jsonFailure(string $message, int $code = self::NOT_FOUND, array $errors = []) {
+        return $this->json(array_merge(['success' => false, 'message' => $message], $errors), $code);
     }
 
 }

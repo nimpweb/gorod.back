@@ -3,6 +3,9 @@
 namespace app\models;
 
 use core\DBModel;
+use core\Request;
+use core\Token;
+use DateTime;
 
 class User extends DBModel {
 
@@ -10,13 +13,14 @@ class User extends DBModel {
     const STATUS_ACTIVE = 1;
     const STATUS_DELETED = 2;
 
+    private int $id = null;
     public string $firstname = "";
     public string $lastname = "";
     public string $email = "";
     public int $status = self::STATUS_INACTIVE;
     public string $password = "";
     public string $passwordConfirm = "";
-
+    
     public static function tableName(): string {
         return 'users';
     }
@@ -53,9 +57,26 @@ class User extends DBModel {
         ];
     }
 
+    
     public function save() {
         $this->password = password_hash($this->password, PASSWORD_DEFAULT);
         return parent::insert();
+    }
+
+    public static function create(Request $request) : array {
+        $user = new User();
+        if (!$user->validateRequest($request)){
+            return [
+                'success' => false,
+                'data' => null,
+                'errors' => $user->getValidatedErrorMessages()
+            ];
+        }
+        return [
+            'success' => true,
+            'data' => $user,
+            'errors' => []
+        ];
     }
     
 }

@@ -22,6 +22,9 @@ class Router {
     }
 
     public function resolve() {
+        $token = $this->request->getAuthenticatedToken() ?? false;
+        \core\Helper::debug($token);
+
         $path = $this->request->getPath();
         $method = $this->request->method();
         $func = $this->routes[$method][$path] ?? false;

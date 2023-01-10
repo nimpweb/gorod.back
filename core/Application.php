@@ -3,7 +3,9 @@ namespace core;
 
 class Application {
 
+    private $config = [];
     public string $userClass = '';
+    // public Token $token;
     public Router $router;
     public Request $request;
     public Response $response;
@@ -11,6 +13,7 @@ class Application {
     public Database $db;
     public Session $session;
     public ?DbModel $user;
+    public string $token = null;
     
     public static string $ROOT_DIR;
     public static Application $app;
@@ -30,9 +33,18 @@ class Application {
     public static function controllerPath() {
         return realpath(self::$ROOT_DIR.'/mvc/controllers/');
     }
-    
+
+    public function getConfig(string $branch) {
+        return $this->config[$branch] ?? false;
+    }
+
+    public function setToken(string $token) {
+        $this->token = $token;
+    }
+
     public function __construct($rootPath, array $config) {
         $this->userClass = $config['userClass'];
+        $this->token = new Token();
         $this->request = new Request();
         $this->response = new Response();
         $this->router = new Router($this->request, $this->response);
@@ -48,12 +60,7 @@ class Application {
         } else {
             $this->user = null;
         }
-    }
-
-    public function login(DbModel $user) {
-        $this->user = $user;
-        $this->session->set('user', $user->{$user->primaryKey()});
-        return true;
+        $this->config = $config;
     }
 
     public function logout() {
