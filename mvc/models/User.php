@@ -13,7 +13,7 @@ class User extends DBModel {
     const STATUS_ACTIVE = 1;
     const STATUS_DELETED = 2;
 
-    private ?int $id = null;
+    public ?int $id = null;
     public string $firstname = "";
     public string $lastname = "";
     public string $email = "";
@@ -30,7 +30,7 @@ class User extends DBModel {
     }
 
     public function attributes(): array {
-        return ['firstname', 'lastname', 'email', 'status'];
+        return ['id', 'firstname', 'lastname', 'email', 'status', 'password'];
     }
 
     public function labels(): array {
@@ -57,7 +57,16 @@ class User extends DBModel {
         ];
     }
 
-    
+
+    public function prepareInstance(array $fields = ['password', 'passwordConfirm']) {
+        if (!empty($fields)) {
+            foreach ($fields as $field) {
+                unset($this->{$field});
+            }
+        }
+        return $this;
+    }
+
     public function save() {
         $this->password = password_hash($this->password, PASSWORD_DEFAULT);
         return parent::insert();
@@ -72,9 +81,10 @@ class User extends DBModel {
                 'errors' => $user->getValidatedErrorMessages()
             ];
         }
+        $user->password = password_hash($user->password, PASSWORD_DEFAULT);
         if ($id = $user->insert()) {
-            // unset($user['password']);
-            // unset($user['passwordConfirm']);
+            $user->id = $id;
+            $user = $user->prepareInstance();
             return [
                 'success' => true,
                 'data' => $user,

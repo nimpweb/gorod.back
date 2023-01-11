@@ -22,9 +22,6 @@ class Router {
     }
 
     public function resolve() {
-        $token = $this->request->getAuthenticatedToken() ?? false;
-        \core\Helper::debug($token);
-
         $path = $this->request->getPath();
         $method = $this->request->method();
         $func = $this->routes[$method][$path] ?? false;
@@ -38,8 +35,12 @@ class Router {
         }
         
         if (is_array($func)) {
-            Application::$app->controller = new $func[0]();
-            $func[0] = Application::$app->controller;
+            $controller = new $func[0]();
+            Application::$app->controller = $controller;
+            $controller->action = $func[1];
+            $func[0] = $controller;
+
+            foreach ($controller->getMiddlewares() as $middleware) $middleware->execute();
         }
 
         return call_user_func($func, $this->request, $this->response);
@@ -52,7 +53,6 @@ class Router {
     }
     
     public function renderContent($content) {
-        \core\Helper::debug('some data', true);
         $layoutContent = $this->getLayout();
         return str_replace("{{content}}", $content, $layoutContent);
     }

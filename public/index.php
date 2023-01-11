@@ -35,10 +35,12 @@ $app->router->post('/login', [AuthController::class, 'login']);
 $app->router->get('/register', [AuthController::class, 'register']);
 $app->router->post('/register', [AuthController::class, 'register']);
 $app->router->get('/logout', [AuthController::class, 'logout']);
+$app->router->post('/validateToken', [AuthController::class, 'validateToken']);
 
 $app->router->get('/getAllUsers', [UserController::class, 'getAllUsers']);
 
 $app->router->get('/userInfo', [UserController::class, 'userInfo']);
+$app->router->get('/profile', [UserController::class, 'profile']);
 
 
 

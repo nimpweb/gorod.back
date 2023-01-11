@@ -8,6 +8,16 @@ abstract class DBModel extends Model {
     abstract public static function primaryKey(): string;
     abstract public function attributes(): array;
 
+    public static function byId(int $userId) {
+        $data = self::findOne(['id' => $userId]);
+        if (!empty($data)) {
+            $instance = new static();
+            $instance->loadData($data);
+            return $instance;
+        }
+        return false;
+    }
+
     public static function find(array $where = []): array {
         $tableName = static::tableName();
         $attributes = array_keys($where);
@@ -25,7 +35,8 @@ abstract class DBModel extends Model {
     }
 
     public static function findOne(array $where = []) {
-        return static::find($where)[0];
+        $data = static::find($where);
+        return ($data) ? $data[0] : null;
     }
 
     public static function delete(int $id): bool {

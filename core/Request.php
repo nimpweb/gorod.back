@@ -26,16 +26,25 @@ class Request {
         return strtolower($_SERVER['REQUEST_METHOD'] ?? 'GET');
     }
 
+    public function getValidToken() : Object | bool {
+        $token = $this->getAuthenticatedToken();
+        if ($token) {
+            $decoded = Token::check($token);
+            if ($decoded) return $decoded;
+        }
+        return false;
+    }
+
     public function getAuthenticatedToken() {
         $allHeaders = getallheaders();
         if ($allHeaders) {
-            $token = $allHeaders['Authorization'] ?? false;
+            $token = $allHeaders['Authorization'] ?? '';
             if ($token) {
                 $token = $token ? substr($token, strlen('Bearer '), strlen($token)) : null;
             }
             return $token;
         }
-        return false;
+        return '';
     }
 
     public function isGet() {
@@ -44,6 +53,14 @@ class Request {
 
     public function isPost() {
         return $this->method() == 'post';
+    }
+
+    public function __get(string $name): mixed {
+        $body = $this->getBody();
+        if (!empty($body) && array_key_exists($name, $body)) {
+            return $body[$name];
+        }
+        return null;
     }
 
     public function getBody() {

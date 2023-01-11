@@ -4,7 +4,10 @@ namespace core;
 
 use DateTime;
 use DateTimeImmutable;
+use Exception;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+use Firebase\JWT\ExpiredException;
 
 
 class Token extends DBModel {
@@ -41,18 +44,22 @@ class Token extends DBModel {
             'iat' => $beforeDate->getTimestamp(),
             'iss' => $_ENV['HOST'],
             'nbf' => $beforeDate->getTimestamp(),
-            'exp' => $expiredDate,
+            'exp' => $expiredDate->getTimestamp(),
             'user' => $user
         ];
 
         return JWT::encode($data, $_ENV['TOKEN_SECRET_KEY'], 'HS512');
     }
 
-    public static function check(string $token) : array | bool {
+    public static function check(string $token) : Object | bool {
         $key = $_ENV['TOKEN_SECRET_KEY'] ?? ''; 
         $now = new DateTimeImmutable();
         $host = $_ENV['HOST'];
-        $decodedToken = JWT::decode($token, $key, ['HS512']);
+        try {
+            $decodedToken = JWT::decode($token, new Key($key, 'HS512'));
+        } catch (Exception $e) {
+            return false;
+        }
         if ($decodedToken->iss !== $host || $decodedToken->nbf > $now->getTimestamp() || $decodedToken->exp < $now->getTimestamp()) {
             return false;
         }

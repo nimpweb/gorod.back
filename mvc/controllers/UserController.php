@@ -5,18 +5,35 @@ namespace app\controllers;
 use app\models\SoapRequestFacade;
 use app\models\User;
 use core\Controller;
+use core\middlewares\AuthMiddleware;
 use core\Request;
 use core\Response;
 
 class UserController extends Controller {
+
+    public function __construct() {
+        // add restricted routes by authenticating
+        $this->registerMiddleware(new AuthMiddleware(['userInfo']));
+    }
 
     public function getAllUsers(Request $request, Response $response) {
         $userList = User::find([]);
         $response->json($userList);
     }
 
-    public function userInfo(Request $request, Response $response) {
+    public function profile(Request $request, Response $response) {
+        $token = $request->getValidToken();
+        if (!$token) return $response->jsonFail(Response::FORBIDDEN);
+        if ($request->isGet()) {
+            $user = User::byId($token->user->id);
+            $user->prepareInstance(["password", "passwordConfirm", "errors"]);
+            return $response->jsonSuccess($user);
+        }
+        return $response->jsonFail(Response::NOT_FOUND);
+    }
 
+    public function userInfo(Request $request, Response $response) {
+        
         if ($request->isGet()) {
             $account = $request->getBody()['account'] ?? null;
             $srvnum = $request->getBody()['srvnum'] ?? null;
