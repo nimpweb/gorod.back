@@ -14,6 +14,11 @@ class Response {
     const METHOD_NOT_ALLOWED = 405;
     const INTERNAL_SERVER_ERROR = 500;
 
+    public static function fromXmlToJson(string $xml) {
+        $data = simplexml_load_file($xml);
+        return json_decode(json_encode($data), true);
+    }
+
     public function redirect(string $url) {
         header('Location: '. $url);
     }

@@ -3,6 +3,34 @@ namespace core;
 
 class Request {
 
+    public static function arrayToXmlMarkup(array $array, $xmlHeader = false) {
+        $xml = "";
+        foreach($array as $key => $value) {
+            $xml .= "<$key>";
+            if (is_array($value)) {
+                $xml .= self::arrayToXmlMarkup($value);
+            } else {
+                $xml .= $value; 
+            }
+            $xml .= "</$key>";
+        }
+        if ($xmlHeader) $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" .$xml; 
+        return $xml;
+    }
+
+    public static function sendCurl(string $url, mixed $data, array $headers = [], array $certs = [], string $method = 'POST', bool $transformToJson = true) {
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $url);
+
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        $response = curl_exec($curl);
+        curl_close($curl);
+
+        if ($response) {
+
+        }
+    }
+
 
     public function getPath() {
         $path = $_SERVER['REQUEST_URI'] ?? '/';
@@ -96,23 +124,9 @@ class Request {
         return $response;
     }
 
-    public function arrayToXmlMarkup(array $array) {
-        $xml = "";
-        foreach($array as $key => $value) {
-            $xml .= "<$key>";
-            if (is_array($value)) {
-                $xml .= $this->arrayToXmlMarkup($value);
-            } else {
-                $xml .= $value; 
-            }
-            $xml .= "</$key>";
-        }
-        return $xml;
-    }
-
     private function transformToXml(string $action, string $command, array $data, string $terminal) {
 
-        $xml = $this->arrayToXmlMarkup($data);
+        $xml = self::arrayToXmlMarkup($data);
 
         return "
             <?xml version=\"1.0\" encoding=\"UTF-8\"?>
