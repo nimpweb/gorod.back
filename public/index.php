@@ -3,6 +3,7 @@
 use app\controllers\AuthController;
 use app\controllers\SiteController;
 use app\controllers\UserController;
+use app\controllers\PaymentController;
 use core\Application;
 
 require_once(__DIR__ . "./../vendor/autoload.php");
@@ -41,6 +42,9 @@ $app->router->get('/getAllUsers', [UserController::class, 'getAllUsers']);
 
 $app->router->get('/userInfo', [UserController::class, 'userInfo']);
 $app->router->get('/profile', [UserController::class, 'profile']);
+
+$app->router->post('/payment/create', [PaymentController::class, 'create']);
+$app->router->post('/payment/status', [PaymentController::class, 'status']);
 
 
 
