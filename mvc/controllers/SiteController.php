@@ -8,6 +8,11 @@ use core\Request;
 class SiteController extends Controller {
 
     public function home() {
+
+        $salt = '123';
+        $password = '12345678';
+        $hash = md5(md5($password) + $salt);
+
         $params = [
             "param1" => "yeah"
         ];

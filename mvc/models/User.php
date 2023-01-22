@@ -3,9 +3,8 @@
 namespace app\models;
 
 use core\DBModel;
+use core\Helper;
 use core\Request;
-use core\Token;
-use DateTime;
 
 class User extends DBModel {
 
@@ -14,10 +13,15 @@ class User extends DBModel {
     const STATUS_DELETED = 2;
 
     public ?int $id = null;
+    public int $userid = 0;
+    public string $username = "";
     public string $firstname = "";
     public string $lastname = "";
     public string $email = "";
-    public int $status = self::STATUS_INACTIVE;
+    public string $salt = "";
+    public string $hash = "";
+    public string $phonenumber = "";
+    public string | null $status = "";
     public string $password = "";
     public string $passwordConfirm = "";
     
@@ -30,7 +34,7 @@ class User extends DBModel {
     }
 
     public function attributes(): array {
-        return ['id', 'firstname', 'lastname', 'email', 'status', 'password'];
+        return ['userid', 'username', 'email', 'status', 'hash', 'salt', 'password', 'passwordConfirm'];
     }
 
     public function labels(): array {
@@ -57,8 +61,11 @@ class User extends DBModel {
         ];
     }
 
+    public function getServices() {
+        return ServiceBind::byUserId($this->userid);
+    }
 
-    public function prepareInstance(array $fields = ['password', 'passwordConfirm']) {
+    public function prepareInstance(array $fields = ['password', 'passwordConfirm', 'hash', 'firstname', 'lastname', 'errors']) {
         if (!empty($fields)) {
             foreach ($fields as $field) {
                 unset($this->{$field});
@@ -67,8 +74,16 @@ class User extends DBModel {
         return $this;
     }
 
+    public static function hashPassword(string $value, string $salt) {
+        $data = md5($value);
+        $data .= $salt;
+        return md5($data);
+    }
+
+
     public function save() {
-        $this->password = password_hash($this->password, PASSWORD_DEFAULT);
+        // $this->password = password_hash($this->password, PASSWORD_DEFAULT);
+        $this->password = $this->hashPassword($this->password, $this->salt);
         return parent::insert();
     }
 

@@ -25,8 +25,9 @@ abstract class Model {
     }
 
 
-    protected function loadData($data) {
+    public function loadData($data) {
         foreach ($data as $key => $value) {
+            $key = strtolower($key);
             if (property_exists($this, $key)) {
                 $this->{$key} = $value;
             }

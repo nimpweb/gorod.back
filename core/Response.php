@@ -6,12 +6,14 @@ class Response {
 
     const OK = 200;
     const CREATED = 201;
+    const ACCEPTED = 202;
     const BAD_REQUEST = 400;
     const UNAUTHORIZED = 401;
     const PAYMENT_REQUIRED = 402;
     const FORBIDDEN = 403;
     const NOT_FOUND = 404;
     const METHOD_NOT_ALLOWED = 405;
+    const REQUEST_TIMEOUT = 408;
     const INTERNAL_SERVER_ERROR = 500;
 
     public static function fromXmlToJson(string $xml) {
@@ -41,8 +43,7 @@ class Response {
         try {
             $this->json(array_merge(['success' => true], $data), self::OK);
         } catch (\Throwable $th) {
-            Helper::debug($data);
-            Helper::dump(gettype($data), true);
+            $this->json(['success' => false, 'message' => $th->getMessage()], $th->getCode());
         }
         return ;
     }

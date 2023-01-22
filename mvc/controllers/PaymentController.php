@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use core\Application;
 use core\Controller;
 use core\Request;
 use core\Response;
@@ -11,25 +12,44 @@ class PaymentController extends Controller {
     private string $paymentHost = "";
     private string $merchant = "";
     private int $currencyType = 643;
+    private string $lang = "";
 
     private string $approveUrl = "";
     private string $cancelUrl = "";
     private string $declineUrl = "";
 
     private function initConfig() {
+        // $config = Application::$app->getConfig()
         $this->paymentHost = $_ENV['PAYMENT_HOST'] ?? null;
         $this->merchant = $_ENV['PAYMENT_MERCHANT'] ?? null;
         $this->currencyType = $_ENV['PAYMENT_CURRENCY'] ?? null;
-
-        $this->approveUrl = 'http://localhost:3000/payment-success';
-        $this->cancelUrl = 'https://localhost:3000/payment-cancel';
-        $this->declineUrl = 'https://localhost:3000/payment-decline';
+        $this->lang = $_ENV['PAYMENT_LANG'] ?? null;
+        $apiHost = $_ENV['API_HOST'];
+        $this->approveUrl = "$apiHost/payment-success";
+        $this->cancelUrl = "$apiHost/payment-cancel";
+        $this->declineUrl = "$apiHost/payment-decline";
     }
 
     public function __construct() {
         $this->initConfig();        
     }
 
+    public function paymentSuccess(Response $response) {
+        return $response->jsonSuccess(['success' => true, "message" => "Payment success"]);
+    }
+
+    public function paymentCancel(Response $response) {
+        return $response->jsonSuccess(['success' => true, "message" => "Payment cancel"]);
+    }
+
+    public function paymentDecline(Response $response) {
+        return $response->jsonSuccess(['success' => true, "message" => "Payment decline"]);
+    }
+
+
+    /**
+     * Create order and get orderNumber and sessionNumber
+     */
     public function create(Request $request, Response $response) {
         if (!$this->paymentHost || !$this->merchant || !$this->currencyType) {
             return $response->jsonFailure("No data to connect a payment host", Response::BAD_REQUEST);
@@ -43,15 +63,15 @@ class PaymentController extends Controller {
             'TKKPG' => [
                 'Request' => [
                     'Operation' => 'CreateOrder',
-                    'Language' => 'RU',
+                    'Language' => $this->lang,
                     'Order' => [
-                        'Merchant' => $merchant,
+                        'Merchant' => $this->merchant,
                         'Amount' => $amount,
-                        'Currency' => $currency,
+                        'Currency' => $this->currencyType,
                         'Description' => $description,
-                        'ApproveURL' => $approveUrl,
-                        'CancelURL' => $cancelUrl,
-                        'DeclineURL' => $declineUrl,
+                        'ApproveURL' => $this->approveUrl,
+                        'CancelURL' => $this->cancelUrl,
+                        'DeclineURL' => $this->declineUrl,
                     ]
                 ]
             ]
@@ -77,6 +97,9 @@ class PaymentController extends Controller {
         return $response->jsonFailure("Нет данных", Response::NOT_FOUND);
     }
 
+    /** 
+     * Reveive an order status
+     */
     public function status(Request $request, Response $response) {
         $paymentSessionId = $request->paymentSessionId ?? null;
         $paymentOrderId = $request->paymentOrderId ?? null;
@@ -101,10 +124,14 @@ class PaymentController extends Controller {
             $orderStatusCode = $result['TKKPG']['Response']['Status'] ?? null;
             $orderStatusMessage = $result['TKKPG']['Response']['Order']['OrderStatus'] ?? null;
             if (!$orderStatusCode || !$orderStatusMessage) {
-                $response->jsonFailure("Nodata", Response::BAD_REQUEST);
+                return $response->jsonFailure("Nodata", Response::BAD_REQUEST);
             }
+            return $response->jsonSuccess([
+                'code' => $orderStatusCode,
+                'message' => $orderStatusMessage
+            ]);
         }
-
+        return $response->jsonFailure('Status cannot been received', Response::REQUEST_TIMEOUT);    
     }
 
 }

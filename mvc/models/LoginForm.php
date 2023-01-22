@@ -9,12 +9,14 @@ use core\Token;
 
 class LoginForm extends Model {
 
-    public string $email = '';
+    public string $userId = '';
+    public string $username = '';
+    // public string $email = '';
     public string $password = '';
 
     public function rules(): array {
         return [
-            'email' => [self::RULE_REQUIRED, self::RULE_EMAIL],
+            'username' => [self::RULE_REQUIRED],
             'password' => [self::RULE_REQUIRED],
         ];
     }
@@ -30,18 +32,28 @@ class LoginForm extends Model {
         if (!$this->validateRequest($request)) {
             return ['success' => false, 'errors' => $this->getValidatedErrorMessages()];
         }
-        $user = User::findOne(['email' => $this->email]);
-        if (!$user) {
-            $this->addError('email', 'Пользователь с таким email не найден!');
+        $candidate = User::findOne(['username' => $this->username]);
+        if (!$candidate) {
+            $this->addError('username', 'Пользователь не найден!');
             return false;
         }
-        if (!password_verify($this->password, $user->password)) {
+        $userId = $candidate->USERID ?? null;
+        if (!$userId) {
+            $this->addError('username', 'Пользователь не идентифицирован!');
+            return false;
+        }
+        $user = User::byId($userId, 'userid');
+        $hash = User::hashPassword($this->password, $user->salt);
+        
+        if ($hash !== $user->hash) {
+            $this->addError('hash', $hash);
+            $this->addError('user_hash', $user->hash);
             $this->addError('password', 'Пароль указан не верно!');
             return false;
         }
-        $user = $user->prepareInstance(['password', 'passwordConfirm', 'errors']);
+        $user = $user->prepareInstance(['password', 'passwordConfirm','hash', 'errors', 'salt']);
         $token = Token::create($user);
-        Application::$app->setToken($token);
+        // Application::$app->setToken($token);
 
         return [
             'user' => $user,
@@ -49,4 +61,6 @@ class LoginForm extends Model {
         ];
     }
 
+
+    
 }

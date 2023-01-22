@@ -8,8 +8,8 @@ abstract class DBModel extends Model {
     abstract public static function primaryKey(): string;
     abstract public function attributes(): array;
 
-    public static function byId(int $userId) {
-        $data = self::findOne(['id' => $userId]);
+    public static function byId(int $userId, string $columnName = 'id') {
+        $data = self::findOne([$columnName => $userId]);
         if (!empty($data)) {
             $instance = new static();
             $instance->loadData($data);
@@ -46,10 +46,10 @@ abstract class DBModel extends Model {
         return $statement->execute();
     }
 
-    public static function select(string $sql, array $where = []) {
+    public static function select(string $sql, array $params = []) {
         $statement = self::prepare($sql);
-        if (!empty($where)) {
-            foreach($where as $value) $statement->bindValue(":$value", $value);
+        if (!empty($params)) {
+            foreach($params as $key => $value) $statement->bindParam(":$key", $value);
         }
         $statement->execute();
         return $statement->fetchAll(\PDO::FETCH_ASSOC);
@@ -63,6 +63,7 @@ abstract class DBModel extends Model {
         }
         return $statement->execute();
     }
+    
 
     public function insert() {
         $tableName = static::tableName();

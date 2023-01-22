@@ -5,9 +5,11 @@ namespace app\controllers;
 use app\models\SoapRequestFacade;
 use app\models\User;
 use core\Controller;
+use core\Helper;
 use core\middlewares\AuthMiddleware;
 use core\Request;
 use core\Response;
+use core\Token;
 
 class UserController extends Controller {
 
@@ -23,11 +25,14 @@ class UserController extends Controller {
 
     public function profile(Request $request, Response $response) {
         $token = $request->getValidToken();
-        if (!$token) return $response->jsonFail(Response::FORBIDDEN);
+        if (!$token || !$token['success']) return $response->jsonFail(Response::FORBIDDEN);
         if ($request->isGet()) {
-            $user = User::byId($token->user->id);
+            $user = User::byId($token['user']->userid, 'userid');
             $user->prepareInstance(["password", "passwordConfirm", "errors"]);
-            return $response->jsonSuccess($user);
+            return $response->jsonSuccess([
+                'user' => $user,
+                'services' => $user->getServices()
+            ]);
         }
         return $response->jsonFail(Response::NOT_FOUND);
     }

@@ -16,6 +16,7 @@ class AuthController extends Controller {
         $loginForm = new LoginForm();
         if ($request->isPost()) {
             $loginResponse = $loginForm->login($request);
+            return $response->jsonSuccess($loginResponse);
             if ($loginResponse && $loginResponse['token']) {
                 return $response->jsonSuccess($loginResponse);
             }

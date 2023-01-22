@@ -45,16 +45,22 @@ class Request {
             header('Access-Control-Allow-Methods: POST, GET, DELETE, PUT, PATCH, OPTIONS');
             // header('Access-Control-Allow-Headers: token, Content-Type');
             header('Access-Control-Allow-Headers: *');
-            header('Access-Control-Allow-Credentials: true');
+            header('Access-Control-Allow-Credentials: false');
             header('Access-Control-Max-Age: 1728000');
             header('Content-Length: 0');
             header('Content-Type: text/plain');
             die();
         }
+        header('Access-Control-Allow-Origin: http://localhost:3000');
+        header('Access-Control-Allow-Methods: *'); 
+        header('Access-Control-Allow-Credentials: false');
+        header('Access-Control-Allow-Headers: *');
+        header('Access-Control-Max-Age: 1728000');
+
         return strtolower($_SERVER['REQUEST_METHOD'] ?? 'GET');
     }
 
-    public function getValidToken() : Object | bool {
+    public function getValidToken() : array | bool {
         $token = $this->getAuthenticatedToken();
         if ($token) {
             $decoded = Token::check($token);
@@ -65,12 +71,12 @@ class Request {
 
     public function getAuthenticatedToken() {
         $allHeaders = getallheaders();
-        if ($allHeaders) {
+        if (!empty($allHeaders)) {
             $token = $allHeaders['Authorization'] ?? '';
             if ($token) {
                 $token = $token ? substr($token, strlen('Bearer '), strlen($token)) : null;
+                return $token;
             }
-            return $token;
         }
         return '';
     }
