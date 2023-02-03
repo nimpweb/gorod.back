@@ -77,9 +77,17 @@ abstract class DBModel extends Model {
         return self::getLastInsertId();
     }
 
-    public function update() {
+    public function update(string $fieldId = 'id') {
         $tableName = static::tableName();
-        $attributes = $this->attributes();
+        $attributes = array_filter($this->attributes(), function($item) use ($fieldId) { return $item !== $fieldId; } );
+        $params = array_map(function($a) { return "$a=:$a"; }, $attributes);
+        $sql = "UPDATE $tableName SET " . $params . " WHERE $fieldId=".$this->{$fieldId};
+        $statement = self::prepare($sql);
+        foreach ($attributes as $attribute) {
+            $statement->bindValue(":$attribute", $this->{$attribute});
+        }
+        $statement->execute();
+        return $this->{$fieldId};
     }
 
     public function __get(string $name) {

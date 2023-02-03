@@ -46,10 +46,10 @@ class LoginForm extends Model {
         $hash = User::hashPassword($this->password, $user->salt);
         
         if ($hash !== $user->hash) {
-            $this->addError('hash', $hash);
-            $this->addError('user_hash', $user->hash);
-            $this->addError('password', 'Пароль указан не верно!');
-            return false;
+            $this->addError('', 'Логин и(или) пароль указаны не верно!');
+            return [
+                'errors' => $this->errors
+            ];
         }
         $user = $user->prepareInstance(['password', 'passwordConfirm','hash', 'errors', 'salt']);
         $token = Token::create($user);

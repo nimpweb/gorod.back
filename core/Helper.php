@@ -15,4 +15,5 @@ class Helper {
         if ($die) exit;
     }
 
+
 }

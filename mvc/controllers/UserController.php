@@ -10,6 +10,7 @@ use core\middlewares\AuthMiddleware;
 use core\Request;
 use core\Response;
 use core\Token;
+use Exception;
 
 class UserController extends Controller {
 
@@ -35,6 +36,12 @@ class UserController extends Controller {
             ]);
         }
         return $response->jsonFail(Response::NOT_FOUND);
+    }
+
+    public function update(Request $request, Response $response) {
+        if (!$request->isPost) throw new Exception("Method not allowed", Response::METHOD_NOT_ALLOWED);
+        $candidate = new User();
+        // $cadidate->load
     }
 
     public function userInfo(Request $request, Response $response) {

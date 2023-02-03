@@ -46,10 +46,6 @@ class PaymentController extends Controller {
         return $response->jsonSuccess(['success' => true, "message" => "Payment decline"]);
     }
 
-
-    /**
-     * Create order and get orderNumber and sessionNumber
-     */
     public function create(Request $request, Response $response) {
         if (!$this->paymentHost || !$this->merchant || !$this->currencyType) {
             return $response->jsonFailure("No data to connect a payment host", Response::BAD_REQUEST);
@@ -97,9 +93,6 @@ class PaymentController extends Controller {
         return $response->jsonFailure("Нет данных", Response::NOT_FOUND);
     }
 
-    /** 
-     * Reveive an order status
-     */
     public function status(Request $request, Response $response) {
         $paymentSessionId = $request->paymentSessionId ?? null;
         $paymentOrderId = $request->paymentOrderId ?? null;
@@ -133,5 +126,6 @@ class PaymentController extends Controller {
         }
         return $response->jsonFailure('Status cannot been received', Response::REQUEST_TIMEOUT);    
     }
+
 
 }
